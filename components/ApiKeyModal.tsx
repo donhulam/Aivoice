@@ -17,43 +17,19 @@ interface ApiKeyModalProps {
 const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
   isOpen,
   onSetUserKeys,
-  onUseSystemKey,
-  systemUsageCount,
-  systemUsageStartTime,
-  maxSystemUsage,
-  usageWindowMs,
   canClose,
   onClose,
   existingKeys = []
 }) => {
-  const [activeTab, setActiveTab] = useState<'user' | 'system'>('user');
   const [inputKey, setInputKey] = useState('');
   const [keys, setKeys] = useState<string[]>([]);
   const [error, setError] = useState('');
-  const [resetTimeStr, setResetTimeStr] = useState<string>('');
 
   useEffect(() => {
     if (isOpen) {
       setKeys(existingKeys);
     }
   }, [isOpen, existingKeys]);
-
-  useEffect(() => {
-    // Determine reset time string if quota is exceeded
-    if (systemUsageStartTime > 0 && systemUsageCount >= maxSystemUsage) {
-       const resetTime = new Date(systemUsageStartTime + usageWindowMs);
-       const now = new Date();
-       if (resetTime > now) {
-         setResetTimeStr(resetTime.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }));
-       } else {
-         setResetTimeStr('Bây giờ');
-       }
-       // If out of quota, default to user tab unless it's just about to reset
-       setActiveTab('user');
-    } else {
-       setResetTimeStr('');
-    }
-  }, [systemUsageCount, maxSystemUsage, systemUsageStartTime, usageWindowMs]);
 
   if (!isOpen) return null;
 
@@ -96,9 +72,6 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
     return `${key.substring(0, 6)}...${key.substring(key.length - 4)}`;
   };
 
-  const remaining = Math.max(0, maxSystemUsage - systemUsageCount);
-  const isQuotaExceeded = systemUsageCount >= maxSystemUsage;
-
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
       {/* Backdrop */}
@@ -128,33 +101,8 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
           )}
         </div>
 
-        {/* Tabs */}
-        <div className="flex border-b border-slate-100">
-          <button
-            className={`flex-1 py-3 text-sm font-medium transition-colors ${
-              activeTab === 'user' 
-                ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/50' 
-                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-            }`}
-            onClick={() => setActiveTab('user')}
-          >
-            Keys Cá nhân
-          </button>
-          <button
-            className={`flex-1 py-3 text-sm font-medium transition-colors ${
-              activeTab === 'system' 
-                ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/50' 
-                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-            }`}
-            onClick={() => setActiveTab('system')}
-          >
-            Dùng thử miễn phí
-          </button>
-        </div>
-
         {/* Body */}
         <div className="p-6">
-          {activeTab === 'user' ? (
             <div className="space-y-4">
               
               {/* List of added keys */}
@@ -212,53 +160,6 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
                 Lưu & Sử dụng ({keys.length + (inputKey.trim() && !keys.includes(inputKey.trim()) ? 1 : 0)} Keys)
               </button>
             </div>
-          ) : (
-            <div className="space-y-6 text-center">
-              <div className="py-2">
-                <div className={`text-4xl font-extrabold mb-1 ${isQuotaExceeded ? 'text-slate-400' : 'text-slate-800'}`}>{remaining}</div>
-                <div className="text-sm font-medium text-slate-500 uppercase tracking-wide">Lượt còn lại</div>
-              </div>
-              
-              <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-                <div 
-                  className={`h-full rounded-full transition-all duration-500 ${isQuotaExceeded ? 'bg-red-400' : 'bg-green-500'}`} 
-                  style={{ width: `${(remaining / maxSystemUsage) * 100}%` }}
-                ></div>
-              </div>
-
-              {!isQuotaExceeded ? (
-                <>
-                  <p className="text-sm text-slate-600">
-                    Bạn được tặng {maxSystemUsage} lượt tạo miễn phí mỗi 2 giờ trên thiết bị này.
-                  </p>
-                  <button
-                    onClick={onUseSystemKey}
-                    className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-all shadow-md shadow-emerald-200"
-                  >
-                    Tiếp tục dùng thử
-                  </button>
-                </>
-              ) : (
-                <>
-                  <div className="text-sm text-red-600 font-medium bg-red-50 p-4 rounded-xl border border-red-100">
-                    <p className="mb-1">Bạn đã dùng hết lượt thử trong khung giờ này.</p>
-                    {resetTimeStr && (
-                      <p className="text-xs text-slate-500">Lượt dùng mới sẽ có vào lúc <span className="font-bold text-slate-700">{resetTimeStr}</span></p>
-                    )}
-                  </div>
-                  <button
-                    disabled
-                    className="w-full py-3 bg-slate-200 text-slate-400 font-semibold rounded-xl cursor-not-allowed"
-                  >
-                    Vui lòng chờ
-                  </button>
-                  <p className="text-xs text-slate-400 cursor-pointer hover:text-indigo-600" onClick={() => setActiveTab('user')}>
-                    Hoặc nhập Key cá nhân để sử dụng ngay &rarr;
-                  </p>
-                </>
-              )}
-            </div>
-          )}
         </div>
       </div>
     </div>

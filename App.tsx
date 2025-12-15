@@ -337,7 +337,7 @@ const App: React.FC = () => {
                 Chuyển văn bản thành <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Giọng nói sống động</span>
               </h1>
               <p className="text-lg text-slate-500 leading-relaxed">
-                Tạo giọng đọc chuyên nghiệp cho video, podcast và thuyết trình sử dụng công nghệ Gemini AI tiên tiến.
+                Tạo giọng đọc chuyên nghiệp cho video, podcast và thuyết trình.
               </p>
             </div>
             <InputSection 
@@ -365,7 +365,7 @@ const App: React.FC = () => {
 
       {/* Footer */}
       <footer className="py-8 text-center text-slate-400 text-sm border-t border-slate-200 mt-auto bg-white">
-        <p>&copy; {new Date().getFullYear()} Voice Studio. Được hỗ trợ bởi Google Gemini.</p>
+        <p>&copy; {new Date().getFullYear()} Voice Studio. Phát triển: Đỗ Lâm</p>
       </footer>
 
       {/* Sidebar Overlay */}
